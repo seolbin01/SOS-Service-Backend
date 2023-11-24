@@ -1,0 +1,9 @@
+[[auth-login]]
+
+=== 로그인
+
+operation::user-login[snippets='http-request,request-fields,http-response,response-fields']
+
+=== 로그인 예외
+
+operation::user-login-error[snippets='http-request,request-fields,http-response,response-fields']

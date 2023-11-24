@@ -1,0 +1,193 @@
+plugins {
+    id 'java'
+    id 'jacoco'
+    id 'org.springframework.boot' version "2.7.12"
+    id 'io.spring.dependency-management' version "1.0.15.RELEASE"
+    id 'org.asciidoctor.jvm.convert' version "3.3.2"
+}
+
+group = 'group.ict.sosservice'
+version = '0.0.1-SNAPSHOT'
+
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
+
+springBoot {
+    mainClass = 'group.ict.sosservice.SosServiceApplication'
+}
+
+jacoco {
+    toolVersion = "0.8.9"
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+    asciidoctorExt
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    queryDslVersion = '5.0.0'
+    springRestDocsVersion = '2.0.6.RELEASE'
+    snippetsDir = file('build/generated-snippets')
+    restDocsDir = file('src/main/resources/static/docs')
+}
+
+dependencies {
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    //== model mapper
+    implementation 'org.modelmapper:modelmapper:3.0.0'
+
+    //== spring session
+    implementation 'org.springframework.session:spring-session-jdbc'
+
+    // spring security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.security:spring-security-test'
+
+    // other spring starter dependencies
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // configuration processor
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+    // lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+
+    // database dependencies
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    implementation 'com.h2database:h2'
+
+    // spring test starter dependency
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    //=== query dsl
+    implementation "com.querydsl:querydsl-core:$queryDslVersion"
+    implementation "com.querydsl:querydsl-jpa:$queryDslVersion"
+
+    annotationProcessor "com.querydsl:querydsl-apt:$queryDslVersion"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+
+    //=== spring rest docs
+    asciidoctorExt "org.springframework.restdocs:spring-restdocs-asciidoctor:$springRestDocsVersion"
+    testImplementation "org.springframework.restdocs:spring-restdocs-mockmvc:$springRestDocsVersion"
+}
+
+test {
+    outputs.dir snippetsDir
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+asciidoctor {
+    inputs.dir snippetsDir
+    configurations 'asciidoctorExt'
+    dependsOn test
+
+    sources{
+        include("**/*.adoc","**/common/*.adoc")
+    }
+
+    baseDirFollowsSourceDir()
+}
+
+tasks.register('copyDocument', Copy) {
+    dependsOn asciidoctor
+    from file(asciidoctor.outputDir)
+    into restDocsDir
+}
+
+tasks.register('buildDocument', Copy) {
+    dependsOn copyDocument
+    from file(asciidoctor.outputDir)
+    into restDocsDir
+}
+
+bootJar {
+    dependsOn buildDocument
+}
+
+jacocoTestReport {
+    dependsOn test
+
+    reports {
+        csv.required = false
+        xml.required = true
+        html.required = true
+        html.destination "${buildDir}/jacocoHtml" as File
+    }
+
+    def Qdomains = []
+
+    for (qPattern in "*QA".."*QZ") {
+        Qdomains.add(qPattern + "*")
+    }
+
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it,
+                    exclude: [
+                            '*SosServiceApplication*',
+                            '*H2DevConfig*',
+                            '*JpaPersistentTokenRepository*'
+                    ] + Qdomains)
+        }))
+    }
+
+    finalizedBy jacocoTestCoverageVerification
+}
+
+jacocoTestCoverageVerification {
+    def Qdomains = []
+    for (qPattern in "*QA".."*QZ") {
+        Qdomains.add(qPattern + "*")
+    }
+
+    violationRules {
+        rule {
+            enabled = true
+            element = 'CLASS'
+
+            limit {
+                counter = 'BRANCH'
+                value = 'COVEREDRATIO'
+                minimum = 0.30
+            }
+
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.30
+            }
+
+            limit {
+                counter = 'LINE'
+                value = 'TOTALCOUNT'
+                maximum = 200
+            }
+
+            excludes = [
+                    "*SosServiceApplication*",
+                    '*H2DevConfig*',
+                    '*JpaPersistentTokenRepository*'
+            ] + Qdomains
+        }
+    }
+}

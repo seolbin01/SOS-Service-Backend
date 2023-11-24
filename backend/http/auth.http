@@ -1,0 +1,27 @@
+### 회원가입
+POST http://localhost:8082/api/v1/auth/signup
+Content-Type: application/json
+
+{
+  "name": "홍길동",
+  "email": "test-user@gmail.com",
+  "password": "test-password",
+  "birth": "1997-04-23",
+  "profileImage": "www.test.com/profile.jpg",
+  "phoneNumber": "010-1234-5678"
+}
+
+### 로그인
+POST http://localhost:8082/api/v1/auth/login?remember=true
+Content-Type: application/json
+
+{
+  "email": "test-user@gmail.com",
+  "password": "test-password"
+}
+
+### 로그아웃
+POST http://localhost:8082/api/v1/auth/logout
+
+### 회원정보 조회
+GET http://localhost:8082/api/v1/auth/me

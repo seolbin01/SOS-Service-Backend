@@ -1,0 +1,21 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+    properties:
+      hibernate:
+        default_batch_fetch_size: 1000
+        show_sql: true
+        format_sql: true
+
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: "jdbc:h2:mem:sos-test;MODE=MYSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;NON_KEYWORDS=USER"
+    username: sa
+    password:
+
+security:
+  authentication:
+    remember-me-key: test-key
+    validity-seconds: 2592000  # 30일

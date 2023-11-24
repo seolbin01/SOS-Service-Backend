@@ -1,0 +1,55 @@
+image: gradle:alpine
+
+before_script:
+  - cd backend
+  - echo ">> gradlew 실행 권한 설정"
+  - chmod +x ./gradlew
+
+variables:
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+
+stages:
+  - build
+  - test
+
+build:
+  stage: build
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "main"'
+      changes:
+        - backend/*
+        - backend/**/*
+      when: always
+  script:
+    - echo ">> gradle 빌드"
+    - ./gradlew --build-cache assemble
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: push
+    paths:
+      - build
+      - .gradle
+
+test:
+  stage: test
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "main"'
+      changes:
+        - backend/*
+        - backend/**/*
+      when: always
+  dependencies:
+    - build
+  script:
+    - echo ">> 테스트 실행"
+    - ./gradlew test
+    - echo ">> 테스트 커버리지 결과 출력"
+    - cat build/jacocoHtml/index.html
+  coverage: '/Total.*?([0-9]{1,3})%/'
+  artifacts:
+    when: always
+    paths:
+      - backend/build/test-results/test/
+    reports:
+      junit:
+        - backend/build/test-results/test/TEST-*.xml

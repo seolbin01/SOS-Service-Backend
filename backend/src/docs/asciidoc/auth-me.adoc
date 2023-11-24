@@ -1,0 +1,5 @@
+[[auth-me]]
+
+=== 회원 정보 조회
+
+operation::user-me[snippets='http-request,http-response,response-fields']

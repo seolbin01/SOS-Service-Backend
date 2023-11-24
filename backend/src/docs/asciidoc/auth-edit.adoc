@@ -1,0 +1,9 @@
+[[auth-edit]]
+
+=== 회원 정보 수정
+
+operation::user-edit[snippets='http-request,request-fields,http-response']
+
+=== 회원 정보 수정 예외
+
+operation::user-edit-error[snippets='http-request,request-fields,http-response,response-fields']

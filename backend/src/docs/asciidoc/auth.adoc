@@ -1,0 +1,12 @@
+[[auth]]
+
+=== 회원 가입
+
+operation::user-signup[snippets='http-request,request-fields,http-response']
+
+
+| Note: 이메일 형식 참고: [RegExr: email address validation](https://regexr.com/3e48o)
+
+=== 회원 가입 예외
+
+operation::user-signup-invalid-email[snippets='http-request,request-fields,http-response,response-fields']
