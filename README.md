@@ -3,7 +3,7 @@
 ## 💻 프로젝트 소개
 안심귀가 모니터링 및 SOS 서비스 앱입니다.
 
-[📹 시연 동영상](https://www.youtube.com/watch?v=FUO20uc8-Eg&t=9s)
+[:star2: 시연 동영상](https://www.youtube.com/watch?v=FUO20uc8-Eg&t=9s)
 
 ### 📆 개발 기간
 * 23.05.25 ~ 23.09.20.
